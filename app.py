@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from user import User
+from user import User, Dieta
 from database import db
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 import bcrypt
@@ -12,7 +12,6 @@ login_manager = LoginManager()
 db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-# Session <- Conexão ativa
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -64,6 +63,27 @@ def read_user(id_user):
                 return {"username": user.username}
         
         return jsonify({"message": "Usuário não encontrado"}), 404
+
+@app.route('/refeicao', methods=['GET'])
+def get_meals():
+    return jsonify(Dieta)
+
+@app.route('/refeicao', methods=['POST'])
+def add_meal():
+    nova_dieta = request.get_json()
+    Dieta.append(nova_dieta)
+    return jsonify(nova_dieta), 201
+
+@app.route('/refeicao/<int:meal_id>', methods=['PUT'])
+def update_meal(meal_id):
+    updated_dieta = request.get_json()
+    Dieta[meal_id] = updated_dieta
+    return jsonify(updated_dieta)
+
+@app.route('/refeicao/<int:meal_id>', methods=['DELETE'])
+def delete_meal(dieta_id):
+    Dieta.pop(dieta_id)
+    return '', 204
 
 @app.route('/user/<int:id_user>', methods=['PUT'])
 @login_required
