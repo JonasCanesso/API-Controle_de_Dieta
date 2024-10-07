@@ -69,11 +69,19 @@ def get_meals():
     return jsonify(Dieta)
 
 @app.route('/refeicao', methods=['POST'])
+@login_required
 def add_meal():
-    nova_dieta = request.get_json()
-    Dieta.append(nova_dieta)
-    return jsonify(nova_dieta), 201
-
+        nova_dieta = request.get_json()
+        refeicao = Dieta(
+                nome_refeicao=nova_dieta.get('nome_refeicao'),
+                user_id=current_user.id  # Associa a refeição ao usuário autenticado
+        )
+        db.session.add(refeicao)
+        db.session.commit()
+        print(current_user)  # Para verificar se o usuário está autenticado
+        print(current_user.id)  # Para garantir que o ID do usuário está sendo acessado
+        return jsonify({"message": "Refeição adicionada com sucesso."})
+        
 @app.route('/refeicao/<int:meal_id>', methods=['PUT'])
 def update_meal(meal_id):
     updated_dieta = request.get_json()
@@ -82,7 +90,7 @@ def update_meal(meal_id):
 
 @app.route('/refeicao/<int:meal_id>', methods=['DELETE'])
 def delete_meal(dieta_id):
-    Dieta.pop(dieta_id)
+    Dieta.pop("meal_id")
     return '', 204
 
 @app.route('/user/<int:id_user>', methods=['PUT'])
