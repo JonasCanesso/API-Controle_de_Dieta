@@ -64,34 +64,51 @@ def read_user(id_user):
         
         return jsonify({"message": "Usuário não encontrado"}), 404
 
-@app.route('/refeicao', methods=['GET'])
+@app.route('/refeicoes', methods=['GET'])
+@login_required
 def get_meals():
-    return jsonify(Dieta)
-
+    dietas = Dieta.query.filter_by(user_id=current_user.id).all()
+    if dietas:
+        return jsonify([{'id': dieta.id, 'nome_refeicao': dieta.nome_refeicao} for dieta in dietas])
+    return jsonify({"message": "Nenhuma refeição encontrada"}), 404
 @app.route('/refeicao', methods=['POST'])
 @login_required
 def add_meal():
         nova_dieta = request.get_json()
         refeicao = Dieta(
                 nome_refeicao=nova_dieta.get('nome_refeicao'),
-                user_id=current_user.id  # Associa a refeição ao usuário autenticado
+                user_id=current_user.id
         )
         db.session.add(refeicao)
         db.session.commit()
-        print(current_user)  # Para verificar se o usuário está autenticado
-        print(current_user.id)  # Para garantir que o ID do usuário está sendo acessado
+        print(current_user)
+        print(current_user.id) 
         return jsonify({"message": "Refeição adicionada com sucesso."})
         
 @app.route('/refeicao/<int:meal_id>', methods=['PUT'])
+@login_required
 def update_meal(meal_id):
-    updated_dieta = request.get_json()
-    Dieta[meal_id] = updated_dieta
-    return jsonify(updated_dieta)
-
+    dieta = Dieta.query.filter_by(id=meal_id, user_id=current_user.id).first()
+    if not dieta:
+        return jsonify({"message": "Refeição não encontrada ou não autorizada"}), 404
+    
+    nova_refeicao = request.get_json().get('nome_refeicao')
+    if nova_refeicao:
+        dieta.nome_refeicao = nova_refeicao
+        db.session.commit()
+        return jsonify({"message": "Refeição atualizada com sucesso"})
+    
+    return jsonify({"message": "Dados inválidos"}), 400
 @app.route('/refeicao/<int:meal_id>', methods=['DELETE'])
-def delete_meal(dieta_id):
-    Dieta.pop("meal_id")
-    return '', 204
+@login_required
+def delete_meal(meal_id):
+    dieta = Dieta.query.filter_by(id=meal_id, user_id=current_user.id).first()
+    if not dieta:
+        return jsonify({"message": "Refeição não encontrada ou não autorizada"}), 404
+    
+    db.session.delete(dieta)
+    db.session.commit()
+    return jsonify({"message": "Refeição removida com sucesso"})
 
 @app.route('/user/<int:id_user>', methods=['PUT'])
 @login_required

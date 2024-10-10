@@ -7,7 +7,6 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150), nullable=False)
     role = db.Column(db.String(50), nullable=False)
 
-    # Relacionamento com a tabela Dieta
     dietas = db.relationship('Dieta', backref='user', lazy=True)
 
     def __repr__(self):
@@ -17,7 +16,6 @@ class Dieta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome_refeicao = db.Column(db.String(100), nullable=False)
 
-    # Chave estrangeira para associar a refeição a um usuário
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
