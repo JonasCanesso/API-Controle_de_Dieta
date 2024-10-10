@@ -81,8 +81,7 @@ def add_meal():
         )
         db.session.add(refeicao)
         db.session.commit()
-        print(current_user)
-        print(current_user.id) 
+        
         return jsonify({"message": "Refeição adicionada com sucesso."})
         
 @app.route('/refeicao/<int:meal_id>', methods=['PUT'])
