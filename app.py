@@ -71,6 +71,7 @@ def get_meals():
     if dietas:
         return jsonify([{'id': dieta.id, 'nome_refeicao': dieta.nome_refeicao} for dieta in dietas])
     return jsonify({"message": "Nenhuma refeição encontrada"}), 404
+
 @app.route('/refeicao', methods=['POST'])
 @login_required
 def add_meal():
